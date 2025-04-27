@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "adobe-leftovers-remover", "adobe-leftovers-remover\adobe-leftovers-remover.vcxproj", "{8DF964D5-BB70-4DB2-9131-CE18A32F72EF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "generate-header", "generate-header\generate-header.vcxproj", "{B4303C93-2DC6-44EA-A3D5-A9C6E16BBB35}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8DF964D5-BB70-4DB2-9131-CE18A32F72EF}.Debug|x64.ActiveCfg = Debug|x64
+		{8DF964D5-BB70-4DB2-9131-CE18A32F72EF}.Debug|x64.Build.0 = Debug|x64
+		{8DF964D5-BB70-4DB2-9131-CE18A32F72EF}.Release|x64.ActiveCfg = Release|x64
+		{8DF964D5-BB70-4DB2-9131-CE18A32F72EF}.Release|x64.Build.0 = Release|x64
+		{B4303C93-2DC6-44EA-A3D5-A9C6E16BBB35}.Debug|x64.ActiveCfg = Debug|x64
+		{B4303C93-2DC6-44EA-A3D5-A9C6E16BBB35}.Debug|x64.Build.0 = Debug|x64
+		{B4303C93-2DC6-44EA-A3D5-A9C6E16BBB35}.Release|x64.ActiveCfg = Release|x64
+		{B4303C93-2DC6-44EA-A3D5-A9C6E16BBB35}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {98EE4F6F-DDA9-4162-8A87-80CCE5EE7AA0}
+	EndGlobalSection
+EndGlobal
