@@ -44,7 +44,7 @@ The configuration file should follow this format:
 "%APPDATA%/Adobe"
 "..."
 
-[RegistryLeys]
+[RegistryKeys]
 "HKEY_CURRENT_USER\\Software\\Adobe"
 "HKEY_LOCAL_MACHINE\\SOFTWARE\\Adobe"
 "..."
@@ -53,7 +53,7 @@ The configuration file should follow this format:
 ### Sections
 
 - `[Directories]`: List of file system paths to be removed
-- `[RegistryLeys]`: List of registry keys to be removed
+- `[RegistryKeys]`: List of registry keys to be removed
 
 Each entry must be enclosed in double quotes.
 
