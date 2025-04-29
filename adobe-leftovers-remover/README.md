@@ -11,8 +11,11 @@ Adobe products often leave behind numerous files, folders, and registry entries 
 - Clean identification and listing of Adobe-related directories and registry keys
 - User-friendly graphical interface with checkboxes for selective cleanup
 - Batch selection/deselection options for convenience
-- ~~Safe removal process with verification~~ *NOT YET*
+- Removal process
 - Configurable through external data files
+
+## Todo
+[Nothing to do]
 
 ## Screenshots
 
@@ -21,21 +24,20 @@ Adobe products often leave behind numerous files, folders, and registry entries 
 ## Requirements
 
 - Windows 10/11
-- ~~Administrator privileges (for registry modifications)~~ *NOT YET*
 
 ## Installation
 
 ### Pre-built Binaries
 
-~~1. Download the latest release from the [Releases](https://github.com/yourusername/adobe-leftovers-remover/releases) page
-2. Extract the ZIP file to a location of your choice
-3. Run `adobe-leftovers-remover.exe`~~ *NOT YET*
+1. ~~Download the latest release from the [Releases](https://github.com/yourusername/adobe-leftovers-remover/releases) page~~
+2. ~~Extract the ZIP file to a location of your choice~~
+3. ~~Run `adobe-leftovers-remover.exe`~~ *NOT YET*
 
 ### Building from Source
 
-This project uses Qt and can be built with Visual Studio:
+> **NOTE: You must install Qt 6.9 (and Qt VS Tools extension)**.
 
-> Get Qt 6.9 first.
+This project uses Qt and can be built with Visual Studio:
 
 1. Clone the repository
 2. Open `adobe-leftovers-remover.sln` in Visual Studio
@@ -47,7 +49,7 @@ This project uses Qt and can be built with Visual Studio:
 1. Launch the application
 2. Review the listed paths and registry keys
 3. Select the items you want to remove (use "Select All" buttons for convenience)
-4. Click "Clean Selected" to remove the selected items
+4. Click "Delete Selected" to remove the selected items
 5. Restart your computer to complete the cleanup process
 
 ## Configuration
