@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     groups->addWidget(pGroup);
     groups->addWidget(rGroup);
     selLayout->addLayout(groups);
-    QPushButton* btnDel = new QPushButton("Eliminar");
+    QPushButton* btnDel = new QPushButton("Delete");
     selLayout->addWidget(btnDel);
 
     // Logs Tab
