@@ -14,6 +14,7 @@
 #include <QRegularExpression>
 #include <QtConcurrent>
 #include <QMetaObject>
+#include <atomic>
 #include <windows.h>
 #include <shellapi.h>
 #include "data.h"
@@ -32,9 +33,12 @@ QString expandEnv(const QString& raw) {
     return QDir::toNativeSeparators(result);
 }
 
-// Thread-safe deletion of file paths
-void deletePathsThread(const QList<QCheckBox*>& cbs, QTextEdit* log, QProgressBar* progress) {
-    int done = 0;
+// Thread-safe deletion of file paths using shared counter
+void deletePathsThread(const QList<QCheckBox*>& cbs,
+    QTextEdit* log,
+    QProgressBar* progress,
+    std::atomic<int>* doneCounter)
+{
     for (int i = 0; i < cbs.size(); ++i) {
         if (!cbs[i]->isChecked()) continue;
         QString raw = paths.at(i);
@@ -48,14 +52,17 @@ void deletePathsThread(const QList<QCheckBox*>& cbs, QTextEdit* log, QProgressBa
         else if (success) msg = QString("[%1] Deleted path: %2").arg(ts).arg(path);
         else msg = QString("[%1] Failed to delete path: %2").arg(ts).arg(path);
         QMetaObject::invokeMethod(log, "append", Qt::QueuedConnection, Q_ARG(QString, msg));
-        ++done;
+        int done = doneCounter->fetch_add(1) + 1;
         QMetaObject::invokeMethod(progress, "setValue", Qt::QueuedConnection, Q_ARG(int, done));
     }
 }
 
-// Thread-safe deletion of registry keys
-void deleteRegistryThread(const QList<QCheckBox*>& cbs, QTextEdit* log, QProgressBar* progress) {
-    int done = 0;
+// Thread-safe deletion of registry keys using shared counter
+void deleteRegistryThread(const QList<QCheckBox*>& cbs,
+    QTextEdit* log,
+    QProgressBar* progress,
+    std::atomic<int>* doneCounter)
+{
     for (int i = 0; i < cbs.size(); ++i) {
         if (!cbs[i]->isChecked()) continue;
         QString raw = registryKeys.at(i);
@@ -69,15 +76,16 @@ void deleteRegistryThread(const QList<QCheckBox*>& cbs, QTextEdit* log, QProgres
         QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
         QString msg;
         if (res == ERROR_SUCCESS || res == ERROR_FILE_NOT_FOUND)
-            msg = QString("[%1] Deleted registry: %2").arg(ts).arg(raw);
+            msg = QString("[%1] Deleted registry key: %2").arg(ts).arg(raw);
         else
-            msg = QString("[%1] Failed registry delete: %2 (Error %3)").arg(ts).arg(raw).arg(res);
+            msg = QString("[%1] Failed to delete registry key: %2 (Error %3)").arg(ts).arg(raw).arg(res);
         QMetaObject::invokeMethod(log, "append", Qt::QueuedConnection, Q_ARG(QString, msg));
-        ++done;
+        int done = doneCounter->fetch_add(1) + 1;
         QMetaObject::invokeMethod(progress, "setValue", Qt::QueuedConnection, Q_ARG(int, done));
     }
 }
 
+// Check if running with administrative privileges
 bool isRunningAsAdmin() {
     BOOL isAdmin = FALSE;
     PSID adminGroup = NULL;
@@ -92,7 +100,7 @@ bool isRunningAsAdmin() {
 }
 
 int main(int argc, char* argv[]) {
-    // Relaunch as admin if needed
+    // Relaunch as administrator if needed
     if (!isRunningAsAdmin()) {
         wchar_t path[MAX_PATH];
         GetModuleFileNameW(NULL, path, MAX_PATH);
@@ -103,53 +111,64 @@ int main(int argc, char* argv[]) {
     QApplication app(argc, argv);
     QWidget window;
     window.setWindowTitle("Adobe Leftovers Remover");
-    window.resize(800, 600);
+    window.resize(1000, 800);
+    window.setFixedSize(window.size()); // Make the window non-resizable
 
     QVBoxLayout* mainLayout = new QVBoxLayout(&window);
     QTabWidget* tabs = new QTabWidget;
 
-    // Selector Tab
-    QWidget* selTab = new QWidget;
-    QVBoxLayout* selLayout = new QVBoxLayout(selTab);
+    // Cleanup Tab
+    QWidget* cleanupTab = new QWidget;
+    QVBoxLayout* cleanupLayout = new QVBoxLayout(cleanupTab);
     QHBoxLayout* groups = new QHBoxLayout;
 
     // Paths Group
-    QGroupBox* pGroup = new QGroupBox("Paths");
-    QVBoxLayout* pLayout = new QVBoxLayout;
-    QPushButton* selAllP = new QPushButton("Select All");
-    QPushButton* deselAllP = new QPushButton("Deselect All");
-    pLayout->addWidget(selAllP);
-    pLayout->addWidget(deselAllP);
-    QList<QCheckBox*> pCB;
-    for (const QString& s : paths) { auto cb = new QCheckBox(s); pCB.append(cb); pLayout->addWidget(cb); }
-    pLayout->addStretch(); pGroup->setLayout(pLayout);
+    QGroupBox* pathsGroup = new QGroupBox("Paths");
+    QVBoxLayout* pathsLayout = new QVBoxLayout;
+    QPushButton* selectAllPaths = new QPushButton("Select All Paths");
+    QPushButton* deselectAllPaths = new QPushButton("Deselect All Paths");
+    pathsLayout->addWidget(selectAllPaths);
+    pathsLayout->addWidget(deselectAllPaths);
+    QList<QCheckBox*> pathCheckboxes;
+    for (const QString& s : paths) {
+        auto cb = new QCheckBox(s);
+        pathCheckboxes.append(cb);
+        pathsLayout->addWidget(cb);
+    }
+    pathsLayout->addStretch();
+    pathsGroup->setLayout(pathsLayout);
 
-    // Registry Group
-    QGroupBox* rGroup = new QGroupBox("Registry Keys");
-    QVBoxLayout* rLayout = new QVBoxLayout;
-    QPushButton* selAllR = new QPushButton("Select All");
-    QPushButton* deselAllR = new QPushButton("Deselect All");
-    rLayout->addWidget(selAllR);
-    rLayout->addWidget(deselAllR);
-    QList<QCheckBox*> rCB;
-    for (const QString& s : registryKeys) { auto cb = new QCheckBox(s); rCB.append(cb); rLayout->addWidget(cb); }
-    rLayout->addStretch(); rGroup->setLayout(rLayout);
+    // Registry Keys Group
+    QGroupBox* registryGroup = new QGroupBox("Registry Keys");
+    QVBoxLayout* registryLayout = new QVBoxLayout;
+    QPushButton* selectAllRegistry = new QPushButton("Select All Keys");
+    QPushButton* deselectAllRegistry = new QPushButton("Deselect All Keys");
+    registryLayout->addWidget(selectAllRegistry);
+    registryLayout->addWidget(deselectAllRegistry);
+    QList<QCheckBox*> registryCheckboxes;
+    for (const QString& s : registryKeys) {
+        auto cb = new QCheckBox(s);
+        registryCheckboxes.append(cb);
+        registryLayout->addWidget(cb);
+    }
+    registryLayout->addStretch();
+    registryGroup->setLayout(registryLayout);
 
-    groups->addWidget(pGroup);
-    groups->addWidget(rGroup);
-    selLayout->addLayout(groups);
-    QPushButton* btnDel = new QPushButton("Delete");
-    selLayout->addWidget(btnDel);
+    groups->addWidget(pathsGroup);
+    groups->addWidget(registryGroup);
+    cleanupLayout->addLayout(groups);
+    QPushButton* deleteButton = new QPushButton("Delete Selected");
+    cleanupLayout->addWidget(deleteButton);
 
     // Logs Tab
-    QWidget* logTab = new QWidget;
-    QVBoxLayout* logLayout = new QVBoxLayout(logTab);
+    QWidget* logsTab = new QWidget;
+    QVBoxLayout* logsLayout = new QVBoxLayout(logsTab);
     QTextEdit* logView = new QTextEdit;
     logView->setReadOnly(true);
-    logLayout->addWidget(logView);
+    logsLayout->addWidget(logView);
 
-    tabs->addTab(selTab, "Selector");
-    tabs->addTab(logTab, "Logs");
+    tabs->addTab(cleanupTab, "Cleanup");
+    tabs->addTab(logsTab, "Logs");
 
     // Progress Bar
     QProgressBar* progress = new QProgressBar;
@@ -157,25 +176,55 @@ int main(int argc, char* argv[]) {
     mainLayout->addWidget(tabs);
     mainLayout->addWidget(progress);
 
-    // Connections
-    QObject::connect(selAllP, &QPushButton::clicked, [&]() { for (auto cb : pCB) cb->setChecked(true); });
-    QObject::connect(deselAllP, &QPushButton::clicked, [&]() { for (auto cb : pCB) cb->setChecked(false); });
-    QObject::connect(selAllR, &QPushButton::clicked, [&]() { for (auto cb : rCB) cb->setChecked(true); });
-    QObject::connect(deselAllR, &QPushButton::clicked, [&]() { for (auto cb : rCB) cb->setChecked(false); });
+    // Allocate shared counter for progress
+    auto sharedDone = new std::atomic<int>(0);
 
-    QObject::connect(btnDel, &QPushButton::clicked, [&]() {
+    // Connect button signals
+    QObject::connect(selectAllPaths, &QPushButton::clicked, [&]() {
+        for (auto cb : pathCheckboxes) cb->setChecked(true);
+        });
+    QObject::connect(deselectAllPaths, &QPushButton::clicked, [&]() {
+        for (auto cb : pathCheckboxes) cb->setChecked(false);
+        });
+    QObject::connect(selectAllRegistry, &QPushButton::clicked, [&]() {
+        for (auto cb : registryCheckboxes) cb->setChecked(true);
+        });
+    QObject::connect(deselectAllRegistry, &QPushButton::clicked, [&]() {
+        for (auto cb : registryCheckboxes) cb->setChecked(false);
+        });
+
+    QObject::connect(deleteButton, &QPushButton::clicked, [&]() {
         logView->clear();
         int total = 0;
-        for (auto cb : pCB) if (cb->isChecked()) ++total;
-        for (auto cb : rCB) if (cb->isChecked()) ++total;
+        for (auto cb : pathCheckboxes) if (cb->isChecked()) ++total;
+        for (auto cb : registryCheckboxes) if (cb->isChecked()) ++total;
+        // If nothing is selected, log and return
+        if (total == 0) {
+            QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+            logView->append(QString("[%1] No items selected for deletion.").arg(ts));
+            return;
+        }
         progress->setRange(0, total);
         progress->setValue(0);
+        sharedDone->store(0);
         QString startTs = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
         logView->append(QString("[%1] Starting cleanup...").arg(startTs));
-        // Run deletion in separate thread
-        QtConcurrent::run([pCB, rCB, logView, progress]() {
-            deletePathsThread(pCB, logView, progress);
-            deleteRegistryThread(rCB, logView, progress);
+
+        // Disable UI controls during deletion
+        pathsGroup->setEnabled(false);
+        registryGroup->setEnabled(false);
+        deleteButton->setEnabled(false);
+
+        // Run deletion in a separate thread and restore UI when done
+        QtConcurrent::run([=]() {
+            deletePathsThread(pathCheckboxes, logView, progress, sharedDone);
+            deleteRegistryThread(registryCheckboxes, logView, progress, sharedDone);
+            // Switch to Logs tab when finished
+            QMetaObject::invokeMethod(tabs, "setCurrentIndex", Qt::QueuedConnection, Q_ARG(int, 1));
+            // Re-enable UI controls
+            QMetaObject::invokeMethod(pathsGroup, "setEnabled", Qt::QueuedConnection, Q_ARG(bool, true));
+            QMetaObject::invokeMethod(registryGroup, "setEnabled", Qt::QueuedConnection, Q_ARG(bool, true));
+            QMetaObject::invokeMethod(deleteButton, "setEnabled", Qt::QueuedConnection, Q_ARG(bool, true));
             });
         });
 
