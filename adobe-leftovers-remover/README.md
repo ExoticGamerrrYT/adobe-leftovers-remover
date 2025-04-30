@@ -102,9 +102,10 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## To-do
 
+- [x] Add restart PC message after removal.
+- [ ] Add icons.
 - [ ] Remove shortcuts (Desktop/Start Menu).
 - [ ] Remove open with shortcuts.
-- [x] Add restart PC message after removal.
 
 ## License
 
