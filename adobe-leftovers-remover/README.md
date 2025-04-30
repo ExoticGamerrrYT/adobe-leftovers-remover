@@ -103,6 +103,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## To-do
 
 - [x] Add restart PC message after removal.
+- [ ] List processes/services to be stopped in order of being able to delete certain files.
 - [ ] Add icons.
 - [ ] Remove shortcuts (Desktop/Start Menu).
 - [ ] Remove open with shortcuts.
