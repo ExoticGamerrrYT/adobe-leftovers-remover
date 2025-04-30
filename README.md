@@ -2,6 +2,14 @@
 
 This repository contains a set of tools to help remove leftover Adobe software components, directories, and registry entries from your system after uninstallation.
 
+> **COMMUNITY HELP NEEDED**: We're looking for contributions! If you know of any paths or registry keys created by Adobe software that aren't already covered by this tool, please submit them through GitHub issues or pull requests.
+
+## How to contribute with paths or registry keys created by Adobe software
+
+1. Open a new issue on the GitHub repository
+2. Provide the paths or registry keys you've discovered
+3. Include information about which Adobe software created them
+
 ## Project Structure
 
 This repository contains multiple projects, each with its own specific purpose:
