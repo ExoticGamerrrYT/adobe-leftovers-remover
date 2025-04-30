@@ -24,24 +24,7 @@ Each project has its own README file with detailed information:
 
 - For information about the main application, see [adobe-leftovers-remover/README.md](adobe-leftovers-remover/README.md)
 - For information about the header generator tool, see [generate-header/README.md](generate-header/README.md)
-
-## Packaging Releases
-
-The packager utility is used to create ZIP distribution packages of the application. It works by:
-
-1. Taking a version number as input
-2. Copying files from the Qt release directory (`x64/Release`)
-3. Creating a ZIP file named `adobe-leftovers-remover-v<version>.zip`
-
-Usage:
-```
-packager.exe <version>
-```
-
-For example, to create a version 1.2.3 release package:
-```
-packager.exe 1.2.3
-```
+- For information about the packager tool, see [packager/README.md](packager/README.md)
 
 ## License
 
