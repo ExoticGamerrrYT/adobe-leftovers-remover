@@ -16,9 +16,6 @@ Adobe products often leave behind numerous files, folders, and registry entries 
 - Removal process
 - Configurable through external data files
 
-## Todo
-[Nothing to do]
-
 ## Screenshots
 
 [Screenshots will be added in a future update]
