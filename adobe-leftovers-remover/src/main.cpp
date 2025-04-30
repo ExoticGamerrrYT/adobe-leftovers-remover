@@ -219,6 +219,11 @@ int main(int argc, char* argv[]) {
         QtConcurrent::run([=]() {
             deletePathsThread(pathCheckboxes, logView, progress, sharedDone);
             deleteRegistryThread(registryCheckboxes, logView, progress, sharedDone);
+            // Restart PC message
+            QString tsEnd = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+            QString msgEnd = QString("[%1] Cleanup complete. It is recommended to reboot the PC.").arg(tsEnd);
+            QMetaObject::invokeMethod(logView, "append", Qt::QueuedConnection, Q_ARG(QString, msgEnd));
+
             // Switch to Logs tab when finished
             QMetaObject::invokeMethod(tabs, "setCurrentIndex", Qt::QueuedConnection, Q_ARG(int, 1));
             // Re-enable UI controls
