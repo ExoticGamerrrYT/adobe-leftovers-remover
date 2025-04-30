@@ -1,5 +1,7 @@
 # Adobe Leftovers Remover
 
+> **COMMUNITY HELP NEEDED**: We're looking for contributions! If you know of any paths or registry keys created by Adobe software that aren't already covered by this tool, please submit them through GitHub issues or pull requests.
+
 A utility for removing leftover Adobe software components, directories, and registry entries from your system after uninstallation.
 
 ## Overview
