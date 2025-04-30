@@ -99,7 +99,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 - [ ] Remove shortcuts (Desktop/Start Menu).
 - [ ] Remove open with shortcuts.
-- [ ] Add restart PC message after removal.
+- [x] Add restart PC message after removal.
 
 ## License
 
