@@ -43,6 +43,11 @@ This project uses Qt and can be built with Visual Studio:
 3. Select the desired build configuration (Debug/Release)
 4. Build the solution
 
+#### windeployqt command
+```
+windeployqt --release --no-translations --no-system-d3d-compiler --no-system-dxc-compiler --no-opengl-sw --skip-plugin-types generic,tls,imageformats,iconengines <.exe file>
+```
+
 ## Usage
 
 1. Launch the application
