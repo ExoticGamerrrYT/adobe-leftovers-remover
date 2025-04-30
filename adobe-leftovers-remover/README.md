@@ -28,9 +28,9 @@ Adobe products often leave behind numerous files, folders, and registry entries 
 
 ### Pre-built Binaries
 
-1. ~~Download the latest release from the [Releases](https://github.com/yourusername/adobe-leftovers-remover/releases) page~~
-2. ~~Extract the ZIP file to a location of your choice~~
-3. ~~Run `adobe-leftovers-remover.exe`~~ *NOT YET*
+1. Download the latest release from the [Releases](https://github.com/ExoticGamerrrYT/adobe-leftovers-remover/releases) page
+2. Extract the ZIP file to a location of your choice
+3. Run `adobe-leftovers-remover.exe`
 
 ### Building from Source
 
