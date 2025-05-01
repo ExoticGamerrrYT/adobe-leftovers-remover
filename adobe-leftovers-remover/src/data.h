@@ -9,6 +9,7 @@ inline const QStringList paths = {
     "C:/ProgramData/Adobe",
     "%LOCALAPPDATA%/Adobe",
     "%LOCALAPPDATA%/Low/Adobe",
+    "%APPDATA%/LocalLow/Adobe",
     "%APPDATA%/Adobe",
     "%TEMP%/Adobe",
     "%USERPROFILE%/Documents/Adobe",
