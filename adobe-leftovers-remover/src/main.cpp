@@ -14,9 +14,11 @@
 #include <QRegularExpression>
 #include <QtConcurrent>
 #include <QMetaObject>
+#include <QProcess>
 #include <atomic>
 #include <windows.h>
 #include <shellapi.h>
+#include <tlhelp32.h>
 #include "data.h"
 
 // Expand environment variables in a path
@@ -31,6 +33,40 @@ QString expandEnv(const QString& raw) {
         result.replace(m.captured(0), env.value(var));
     }
     return QDir::toNativeSeparators(result);
+}
+
+// NEW: Check for armsvc.exe, kill if found, and log in English
+void checkAndKillArmsvc(QTextEdit* log) {
+    const QString procName = "armsvc.exe";
+    bool found = false;
+
+    // Create snapshot of all processes
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnap != INVALID_HANDLE_VALUE) {
+        PROCESSENTRY32 pe;
+        pe.dwSize = sizeof(PROCESSENTRY32);
+        if (Process32First(hSnap, &pe)) {
+            do {
+                if (QString::fromWCharArray(pe.szExeFile).compare(procName, Qt::CaseInsensitive) == 0) {
+                    found = true;
+                    break;
+                }
+            } while (Process32Next(hSnap, &pe));
+        }
+        CloseHandle(hSnap);
+    }
+
+    QString ts = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+    if (found) {
+        log->append(QString("[%1] Process %2 found. Attempting to terminate...").arg(ts).arg(procName));
+        // Force kill
+        QProcess::execute("taskkill", QStringList() << "/IM" << procName << "/F");
+        ts = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+        log->append(QString("[%1] Process %2 terminated.").arg(ts).arg(procName));
+    }
+    else {
+        log->append(QString("[%1] Process %2 not running.").arg(ts).arg(procName));
+    }
 }
 
 // Thread-safe deletion of file paths using shared counter
@@ -195,6 +231,10 @@ int main(int argc, char* argv[]) {
 
     QObject::connect(deleteButton, &QPushButton::clicked, [&]() {
         logView->clear();
+
+        // NEW: Check and kill armsvc.exe before any deletions
+        checkAndKillArmsvc(logView);
+
         int total = 0;
         for (auto cb : pathCheckboxes) if (cb->isChecked()) ++total;
         for (auto cb : registryCheckboxes) if (cb->isChecked()) ++total;
